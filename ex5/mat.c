@@ -1,0 +1,97 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+
+#define MAX 10
+
+int A[MAX][MAX],B[MAX][MAX],add[MAX][MAX],mul[MAX][MAX],r1,r2,c1,c2;
+
+void *mat_add(void *arg)
+{
+   int i,j;
+   for(i=0;i<r1;i++)
+   {
+      for(j=0;j<c1;j++)
+      {
+         add[i][j]=A[i][j]+B[i][j];
+      }
+   }
+   printf("Thread 1 performed addition.\n");
+   pthread_exit(NULL);
+}
+void *mat_mul(void *arg)
+{
+   int i,j,k;
+   for(i=0;i<r2;i++)
+   {
+      for(j=0;j<c2;j++)
+      {
+         mul[i][j]=0;
+         for(k=0;k<c1;k++)
+         {
+            mul[i][j]+=A[i][k]*B[k][j];
+         }
+      }
+   }
+   printf("Thread 2 performed Multiplication.\n");
+   pthread_exit(NULL);
+}
+
+int main()
+{
+   pthread_t t1,t2;
+   int i,j;
+   printf("Enter rows and cols of Mat A:");
+   scanf("%d%d",&r1,&c1);
+   printf("Enter rows and cols of Mat B:");
+   scanf("%d%d",&r2,&c2);
+   if(c1!=r2)
+   {
+      printf("Matrix multiplication not possible");
+      return 0;
+   }
+   if(r1!=r2 || c1!=c2)
+   {
+      printf("Matrix addition not possible");
+      return 0;
+   }
+   printf("Enter elements of matrix A:");
+   for(i=0;i<r1;i++)
+   {
+      for(j=0;j<c1;j++)
+      {
+         scanf("%d",&A[i][j]);
+      }
+   }
+   printf("Enter elements of matrix B:");
+   for(i=0;i<r2;i++)
+   {
+      for(j=0;j<c2;j++)
+      {
+         scanf("%d",&B[i][j]);
+      }
+   }
+   pthread_create(&t1,NULL,mat_add,NULL);
+   pthread_create(&t2,NULL,mat_mul,NULL);
+   pthread_join(t1,NULL);
+   pthread_join(t2,NULL);
+   printf("Result of Matrix Addition:\n");
+   for(i=0;i<r1;i++)
+   {
+      for(j=0;j<c1;j++)
+      {
+         printf(" %4d ",add[i][j]);
+      }
+      printf("\n");
+   }
+   printf("Result of Matrix multiplication:\n");
+   for(i=0;i<r2;i++)
+   {
+      for(j=0;j<c2;j++)
+      {
+         printf(" %4d ",mul[i][j]);
+      }
+      printf("\n");
+   }
+   return 0;
+}
